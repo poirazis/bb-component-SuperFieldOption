@@ -3,9 +3,9 @@
   "metadata": {},
   "schema": {
     "name": "bb-component-SuperFieldOption",
-    "friendlyName": "Super Field - Select",
+    "friendlyName": "Super Field - Option",
     "description": "An Option Input Field component for Budibase",
-    "icon": "Text",
+    "icon": "Menu",
     "settings": [
       {
         "type": "field/options",
@@ -36,7 +36,7 @@
         "key": "helpText"
       },
       {
-        "type": "validation/array",
+        "type": "validation/options",
         "label": "Validation",
         "key": "validation"
       },
@@ -180,7 +180,8 @@
         "tag" : "style",
         "type" : "boolean",
         "key" : "useOptionColors",
-        "label" : "Option Colors"
+        "label" : "Option Colors",
+        "defaultValue" : true
       },
       {
         "tag" : "style",
