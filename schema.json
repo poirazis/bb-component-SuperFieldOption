@@ -3,14 +3,265 @@
   "metadata": {},
   "schema": {
     "name": "bb-component-SuperFieldOption",
-    "friendlyName": "bb-component-SuperFieldOption",
-    "description": "An Option Select Input Field for Budibase",
+    "friendlyName": "Super Field - Select",
+    "description": "An Option Input Field component for Budibase",
     "icon": "Text",
     "settings": [
       {
+        "type": "field/options",
+        "label": "Field",
+        "key": "field",
+        "required": true
+      },
+      {
         "type": "text",
-        "key": "text",
-        "label": "Text"
+        "label": "Label",
+        "key": "label"
+      },
+      {
+        "type": "text",
+        "label": "Placeholder",
+        "key": "placeholder",
+        "placeholder": "Choose an option"
+      },
+      {
+        "type": "text",
+        "label": "Default value",
+        "key": "defaultValue",
+        "supportsConditions": false
+      },
+      {
+        "type": "text",
+        "label": "Help text",
+        "key": "helpText"
+      },
+      {
+        "type": "validation/array",
+        "label": "Validation",
+        "key": "validation"
+      },
+      {
+        "type": "event",
+        "label": "On change",
+        "key": "onChange",
+        "context": [
+          {
+            "label": "Field Value",
+            "key": "value"
+          }
+        ]
+      },
+      {
+        "type": "boolean",
+        "label": "Autocomplete",
+        "key": "autocomplete",
+        "defaultValue": false,
+        "dependsOn": {
+          "setting": "controlType",
+          "value": "select"
+        }
+      },
+      {
+        "type": "boolean",
+        "label": "Disabled",
+        "key": "disabled",
+        "defaultValue": false
+      },
+      {
+        "type": "boolean",
+        "label": "Read only",
+        "key": "readonly",
+        "defaultValue": false,
+        "dependsOn": {
+          "setting": "disabled",
+          "value": true,
+          "invert": true
+        }
+      },
+      {
+        "type": "select",
+        "label": "Type",
+        "key": "controlType",
+        "defaultValue": "select",
+        "placeholder": "Pick an options type",
+        "options": [
+          {
+            "label": "Select",
+            "value": "select"
+          },
+          {
+            "label": "Checkboxes",
+            "value": "checkbox"
+          },
+          {
+            "label": "Switches",
+            "value": "switch"
+          }
+        ]
+      },
+      {
+        "type": "select",
+        "label": "Direction",
+        "key": "direction",
+        "defaultValue": "vertical",
+        "options": [
+          {
+            "label": "Horizontal",
+            "value": "horizontal"
+          },
+          {
+            "label": "Vertical",
+            "value": "vertical"
+          }
+        ],
+        "dependsOn": {
+          "setting": "optionsType",
+          "value": "checkbox"
+        }
+      },
+      {
+        "type": "select",
+        "label": "Options source",
+        "key": "optionsSource",
+        "defaultValue": "schema",
+        "placeholder": "Pick an options source",
+        "options": [
+          {
+            "label": "Schema",
+            "value": "schema"
+          },
+          {
+            "label": "Data provider",
+            "value": "provider"
+          },
+          {
+            "label": "Custom",
+            "value": "custom"
+          }
+        ]
+      },
+      {
+        "type": "dataProvider",
+        "label": "Options provider",
+        "key": "dataProvider",
+        "required": true,
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "provider"
+        }
+      },
+      {
+        "type": "field",
+        "label": "Label column",
+        "key": "labelColumn",
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "provider"
+        }
+      },
+      {
+        "type": "field",
+        "label": "Value column",
+        "key": "valueColumn",
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "provider"
+        }
+      },
+      {
+        "type": "options",
+        "key": "customOptions",
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "custom"
+        }
+      },
+      {
+        "tag" : "style",
+        "type" : "boolean",
+        "key" : "useOptionColors",
+        "label" : "Option Colors"
+      },
+      {
+        "tag" : "style",
+        "type": "select",
+        "label": "Options Mode",
+        "key": "optionsViewMode",
+        "defaultValue": "pills",
+        "showInBar": true,
+        "barStyle": "buttons",
+        "options": [
+          {
+            "label": "Pills",
+            "value": "pills",
+            "barIcon": "Button",
+            "barTitle": "1 column"
+          },
+          {
+            "label": "text",
+            "value": "text",
+            "barIcon": "Text",
+            "barTitle": "2 columns"
+          }
+        ]
+      },
+      {
+        "tag" : "style",
+        "type": "select",
+        "label": "Layout",
+        "key": "span",
+        "defaultValue": 6,
+        "showInBar": true,
+        "barStyle": "buttons",
+        "options": [
+          {
+            "label": "1 column",
+            "value": 6,
+            "barIcon": "Stop",
+            "barTitle": "1 column"
+          },
+          {
+            "label": "2 columns",
+            "value": 3,
+            "barIcon": "ColumnTwoA",
+            "barTitle": "2 columns"
+          },
+          {
+            "label": "3 columns",
+            "value": 2,
+            "barIcon": "ViewColumn",
+            "barTitle": "3 columns"
+          }
+        ]
+      },
+      {
+        "type": "select",
+        "label": "Arrangement",
+        "key": "optionsArrangement",
+        "defaultValue": 1,
+        "showInBar": true,
+        "barStyle": "buttons",
+        "dependsOn": {"setting" : "controlType", "value": "select", "invert" : true},
+        "options": [
+          {
+            "label": "1 column",
+            "value": 1,
+            "barIcon": "Stop",
+            "barTitle": "1 column"
+          },
+          {
+            "label": "2 columns",
+            "value": 2,
+            "barIcon": "ColumnTwoA",
+            "barTitle": "2 columns"
+          },
+          {
+            "label": "3 columns",
+            "value": 3,
+            "barIcon": "ViewColumn",
+            "barTitle": "3 columns"
+          }
+        ]
       }
     ]
   }
