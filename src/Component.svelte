@@ -1,8 +1,8 @@
 <script>
   import { getContext , onDestroy} from "svelte";
-  import { SuperCell } from "../../bb_super_components_shared/src/lib"
+  import CellOptions from "../../bb_super_components_shared/src/lib/SuperCell/cells/CellOptions.svelte";
 
-  const { styleable, builderStore, componentStore } = getContext("sdk");
+  const { styleable, Provider, Block, BlockComponent } = getContext("sdk");
   const component = getContext("component");
 
   const formContext = getContext("form");
@@ -11,60 +11,72 @@
   const labelWidth = getContext("field-group-label-width");
   const formApi = formContext?.formApi;
 
+  export let valueType = "string"
   export let field;
-  export let controlType
-  export let useOptionColors
-  export let optionsViewMode
+  export let numfield
+  export let onChange
+  export let validation
+  export let numvalidation
+  export let controlType = "select"
   
-  export let customButtons
+  export let customButtons = []
 
-  export let frontButtons = [];
-  export let frontButtonsQuiet;
-  export let frontButtonsGrouping;
-  export let frontButtonsSelected = [0];
   export let buttons = [];
-  export let buttonsQuiet;
-  export let buttonsGrouping;
-  export let buttonsSelected = [0];
 
-  export let fieldLabel;
-  export let fieldType
+  export let label;
   export let span = 6;
-  export let inForm = false;
   export let placeholder
   export let defaultValue
   export let disabled
   export let readonly
 
-  export let frontIcon
+  export let icon
 
   export let optionsSource
   export let datasource
-  export let valueField
-  export let labelField
-  export let viewMode
-  export let optionsColors = true
-  export let customOptions
+  export let valueColumn
+  export let labelColumn
+  export let colorColumn
+  export let iconColumn
+  export let limit
+  export let sortColumn
+  export let sortOrder
+  export let filter
+  export let customOptions = []
   export let optionsArrangement
+  export let useOptionColors
+  export let useOptionIcons
+  export let optionsViewMode
+  export let autocomplete
+  export let addNew
+  export let onAddNew
 
   let formField;
   let formStep;
   let fieldState;
   let fieldApi;
   let fieldSchema
-  let value;
+
   let cellState
   
-
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
 
-  $: formField = formApi?.registerField(
+  $: valueType == "string" ? formField = formApi?.registerField(
     field,
-    "array",
+    "options",
     defaultValue,
     disabled,
     readonly,
-    null,
+    validation,
+    formStep
+  )
+  : formField = formApi?.registerField(
+    numfield,
+    "number",
+    defaultValue,
+    disabled,
+    readonly,
+    numvalidation,
     formStep
   )
 
@@ -74,25 +86,34 @@
     fieldSchema = value?.fieldSchema;
   });
 
-  $: value = fieldState?.value ? fieldState.value : defaultValue
-
-  $: {
-    if (
-      $builderStore.inBuilder &&
-      $componentStore.selectedComponentPath?.includes($component.id) &&
-      formContext &&
-      !inForm
-    ) {
-      builderStore.actions.updateProp("inForm", true);
-    } else if (
-      $builderStore.inBuilder &&
-      $componentStore.selectedComponentPath?.includes($component.id) &&
-      inForm &&
-      !formContext
-    ) {
-      builderStore.actions.updateProp("inForm", false);
+  $: cellOptions = { 
+      disabled,
+      readonly : readonly || disabled,
+      placeholder: placeholder || "Choose an Option", 
+      defaultValue,
+      autocomplete,
+      addNew,
+      padding: "0.5rem",
+      error: fieldState.error,
+      controlType,
+      optionsArrangement,
+      optionsSource,
+      datasource,
+      filter,
+      sortColumn,
+      sortOrder,
+      limit,
+      valueColumn,
+      labelColumn,
+      colorColumn,
+      iconColumn,
+      useOptionColors,
+      useOptionIcons,
+      optionsViewMode,
+      customOptions,
+      role: "formInput", 
+      icon,
     }
-  }
 
   $: $component.styles = {
     ...$component.styles,
@@ -100,30 +121,17 @@
       ...$component.styles.normal,
       "flex-direction": labelPos == "left" ? "row" : "column",
       gap: labelPos == "left" ? "0.85rem" : "0rem",
-      "grid-column": labelPos ? "span " + span : null,
+      "grid-column": labelPos ? "span " + span : "span 1",
       "--label-width":
         labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
     },
   };
+
+  const handleChange = ( newValue ) => {
+    onChange?.({value: newValue});
+    fieldApi?.setValue( valueType == "string" ? newValue : Number ( newValue ) );
+  }
   
-  const buttonClick = (group, idx) => {
-    if (group == "front" && frontButtonsGrouping == "single") {
-      frontButtonsSelected = [idx];
-    } else if (group == "end" && buttonsGrouping == "single") {
-      buttonsSelected = [idx];
-    }
-
-    if (group == "front" && frontButtonsGrouping == "multi") {
-      let i = frontButtonsSelected.indexOf(idx);
-      if (i > -1) frontButtonsSelected.splice(i, 1);
-      else frontButtonsSelected.push(idx);
-
-      frontButtonsSelected = frontButtonsSelected;
-    } else if (group == "end" && buttonsGrouping == "multi") {
-      buttonsSelected = [idx];
-    }
-  };
-
   onDestroy(() => {
     fieldApi?.deregister()
     unsubscribe?.()
@@ -132,87 +140,58 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<div
-  class="superField"
-  on:focus={cellState.focus} 
-  tabindex="0"
-  use:styleable={$component.styles}  
->
-  <label for="superCell" class="superFieldLabel" class:bound={formContext}>
-    {fieldLabel || field || "Unamed Field"}
-  </label>
-  
-  <div class="inline-cells">
-    {#if customButtons && frontButtons?.length}
-      <div
-        class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        class:spectrum-ActionGroup--quiet={frontButtonsQuiet}
-      >
-        {#each frontButtons as button, idx}
-          <button
-            on:click={(e) => buttonClick("front", idx)}
-            class="spectrum-ActionButton spectrum-ActionButton--sizeM"
-            class:spectrum-ActionButton--quiet={frontButtonsQuiet ||
-              button.quiet}
-            class:warning={button.type == "warning"}
-            class:cta={button.type == "cta"}
-            class:disabled={button.disabled}
-            class:is-selected={frontButtonsGrouping &&
-              frontButtonsSelected.includes(idx)}
-          >
-            <span class="spectrum-ActionButton-label">{@html button?.text}</span
-            >
-          </button>
-        {/each}
-      </div>
-    {/if}
+<Block>
+  <div class="superField" use:styleable={$component.styles}>
 
-    <SuperCell
-      bind:cellState
-      cellOptions={{ 
-        placeholder, 
-        defaultValue,
-        controlType,
-        optionsArrangement,
-        optionsSource,
-        datasource,
-        valueField,
-        labelField,
-        useOptionColors,
-        optionsViewMode,
-        customOptions,
-        role: "formInput", 
-        iconFront: frontIcon,
-        }}
-      {value}
-      {fieldSchema}
-      editable
-      on:change={(e) => fieldApi?.setValue(e.detail)}
-      on:blur={cellState.lostFocus}
-    />
+    {#if label}
+    <label for={$component.id} class="superlabel">
+      {label}
+        {#if fieldState.error}
+          <div class="error">
+            <span>{fieldState.error}</span>
+          </div>
+        {/if}
+     </label>
+     {/if}
+    
+    <div class="inline-cells">
+      <CellOptions
+        id={$component.id}
+        bind:cellState
+        {cellOptions}
+        {fieldSchema}
+        value={fieldState.value}
+        on:change={(e) => handleChange(e.detail[0])}
+        on:blur={cellState.lostFocus}
+        on:addNew={ (e) => onAddNew?.({value: e.detail})}
+      />
 
-    {#if customButtons && buttons?.length}
-      <div
-        class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        class:spectrum-ActionGroup--quiet={buttonsQuiet}
-      >
-        {#each buttons as button, idx}
-          <button
-            class="spectrum-ActionButton spectrum-ActionButton--sizeM"
-            on:click={(e) => buttonClick("end", idx)}
-            class:spectrum-ActionButton--quiet={buttonsQuiet || button.quiet}
-            class:warning={button.type == "warning"}
-            class:cta={button.type == "cta"}
-            class:disabled={button.disabled}
-            class:is-selected={buttonsGrouping && buttonsSelected.includes(idx)}
-          >
-            <span class="spectrum-ActionButton-label">{button.text}</span>
-          </button>
-        {/each}
-      </div>
-    {/if}
+      {#if customButtons && buttons?.length}
+        <div
+          class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
+        >
+          <Provider data={ { value : fieldState.value }} >
+            {#each buttons as { text, onClick , quiet, disabled, type }}
+              <BlockComponent
+                type = "plugin/bb-component-SuperButton"
+                props = {{
+                  quiet,
+                  disabled, 
+                  size: "M",
+                  text,
+                  onClick,
+                  emphasized : true,
+                  selected: type == "cta"
+                }}>
+                </BlockComponent>
+              {/each}
+          </Provider>
+        </div>
+      {/if}
+    </div>
+    
   </div>
-</div>
+</Block>
 
 <style>
   .superField {
@@ -225,9 +204,9 @@
   .superField:focus {
     outline: none;
   }
-  .superFieldLabel {
+  .superlabel {
     display: flex;
-    align-items: flex-start;
+    justify-content: space-between;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -245,32 +224,10 @@
     justify-items: stretch;
     height: 2rem;
   }
-  .warning {
-    color: var(--spectrum-global-color-red-500);
-    border-color: var(--spectrum-global-color-red-500);
-  }
-
-  .spectrum-ActionButton--quiet.warning {
-    color: var(--spectrum-global-color-red-500);
-    border: none;
-  }
-
-  .warning:hover {
-    color: #000;
-    background-color: var(--spectrum-global-color-red-500);
-  }
-  .cta {
-    color: #fff;
-    background-color: var(--primaryColor);
-  }
-
-  .disabled {
-    color: var(--spectrum-global-color-gray-600);
-    background-color: var(--spectrum-global-color-gray-200);
-  }
-
-  .superFieldLabel.bound {
-    gap: 0.5rem;
+  .error {
+    font-size: 12px;
+    line-height: 1.75rem;
+    color: var(--spectrum-global-color-red-700);
   }
 </style>
 
