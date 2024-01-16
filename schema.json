@@ -6,12 +6,47 @@
     "friendlyName": "Super Field - Option",
     "description": "An Option Input Field component for Budibase",
     "icon": "Menu",
+    "requiredAncestors": ["form"],
+    "block" : true,
+    "ejectable" : false,
+    "context" : [
+      {
+        "type": "static",
+        "values": [
+          {
+            "label": "Value",
+            "key": "value",
+            "type": "string"
+          } 
+        ]
+      }
+    ],
     "settings": [
+      {
+        "type" : "select",
+        "label"  : "Field Type",
+        "key" : "valueType",
+        "defaultValue" : "string",
+        "options" : [
+          {"label" : "String/Option" , "value" : "string" },
+          {"label" : "Number" , "value" : "int" }
+        ]
+      },
       {
         "type": "field/options",
         "label": "Field",
         "key": "field",
-        "required": true
+        "resetOn" : "valueType",
+        "required": true,
+        "dependsOn" : {"setting" : "valueType", "value" : "string" }
+      },
+      {
+        "type": "field/number",
+        "label": "Field",
+        "resetOn" : "valueType",
+        "key": "numfield",
+        "required": true,
+        "dependsOn" : {"setting" : "valueType", "value" : "int" }
       },
       {
         "type": "text",
@@ -36,9 +71,18 @@
         "key": "helpText"
       },
       {
-        "type": "validation/options",
+        "type": "validation/string",
         "label": "Validation",
-        "key": "validation"
+        "key": "validation",
+        "resetOn" : "valueType",
+        "dependsOn" : {"setting" : "valueType", "value" : "string" }
+      },
+      {
+        "type": "validation/number",
+        "label": "Validation",
+        "key": "numvalidation",
+        "resetOn" : "valueType",
+        "dependsOn" : {"setting" : "valueType", "value" : "int" }
       },
       {
         "type": "event",
@@ -52,9 +96,182 @@
         ]
       },
       {
+        "type": "select",
+        "label": "Control Type",
+        "key": "controlType",
+        "defaultValue": "select",
+        "placeholder": "Pick an options type",
+        "options": [
+          {
+            "label": "Select",
+            "value": "select"
+          },
+          {
+            "label": "Checkboxes",
+            "value": "checkbox"
+          },
+          {
+            "label": "Switches",
+            "value": "switch"
+          }
+        ]
+      },
+      {
+        "type": "select",
+        "label": "Arrangement",
+        "key": "optionsArrangement",
+        "defaultValue": 1,
+        "showInBar": false,
+        "barStyle": "buttons",
+        "dependsOn": {"setting" : "controlType", "value": "select", "invert" : true},
+        "options": [
+          {
+            "label": "1 column",
+            "value": 1,
+            "barIcon": "Stop",
+            "barTitle": "1 column"
+          },
+          {
+            "label": "2 columns",
+            "value": 2,
+            "barIcon": "ColumnTwoA",
+            "barTitle": "2 columns"
+          },
+          {
+            "label": "3 columns",
+            "value": 3,
+            "barIcon": "ViewColumn",
+            "barTitle": "3 columns"
+          }
+        ]
+      },
+      {
+        "type": "select",
+        "label": "Options source",
+        "key": "optionsSource",
+        "defaultValue": "schema",
+        "placeholder": "Pick an options source",
+        "options": [
+          {
+            "label": "Schema",
+            "value": "schema"
+          },
+          {
+            "label": "Data",
+            "value": "data"
+          },
+          {
+            "label": "Custom",
+            "value": "custom"
+          }
+        ]
+      },
+      {
+        "section" : true,
+        "name" : "Data Settings",
+        "dependsOn" : { "setting" : "optionsSource", "value" : "data" },
+        "settings" : [
+          {
+            "type": "dataSource",
+            "label": "Data",
+            "key": "datasource",
+            "resetOn" : "optionsSource",
+            "required": true,
+            "dependsOn": {
+              "setting": "optionsSource",
+              "value": "data"
+            }
+          },
+          {
+            "type": "filter",
+            "label": "Filtering",
+            "key": "filter"
+          },
+          {
+            "type": "field/sortable",
+            "label": "Sort column",
+            "key": "sortColumn",
+            "placeholder": "None"
+          },
+          {
+            "type": "select",
+            "label": "Sort order",
+            "key": "sortOrder",
+            "options": ["Ascending", "Descending"],
+            "defaultValue": "Ascending"
+          },
+          {
+            "type": "number",
+            "label": "Limit",
+            "key": "limit",
+            "defaultValue": 10
+          },
+          {
+            "type": "field",
+            "label": "Value column",
+            "key": "valueColumn",
+            "required": true,
+            "resetOn" : "datasource",
+            "dependsOn": {
+              "setting": "optionsSource",
+              "value": "data"
+            }
+          },
+          {
+            "type": "field",
+            "label": "Label column",
+            "key": "labelColumn",
+            "resetOn" : "datasource",
+            "dependsOn": {
+              "setting": "optionsSource",
+              "value": "data"
+            }
+          },
+          {
+            "type": "field",
+            "label": "Color column",
+            "key": "colorColumn",
+            "resetOn" : "datasource",
+            "dependsOn": {
+              "setting": "optionsSource",
+              "value": "data"
+            }
+          },
+          {
+            "type": "field",
+            "label": "Icon column",
+            "key": "iconColumn",
+            "resetOn" : "datasource",
+            "dependsOn": {
+              "setting": "optionsSource",
+              "value": "data"
+            }
+          }
+        ]
+      },
+      {
+        "type": "options",
+        "key": "customOptions",
+        "label": "Custom Options",
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "custom"
+        }
+      },
+      {
         "type": "boolean",
         "label": "Autocomplete",
         "key": "autocomplete",
+        "defaultValue": false,
+        "dependsOn": {
+          "setting": "controlType",
+          "value": "select"
+        }
+      },
+      {
+        "type": "boolean",
+        "label": "Allow Input",
+        "key": "addNew",
         "defaultValue": false,
         "dependsOn": {
           "setting": "controlType",
@@ -79,130 +296,65 @@
         }
       },
       {
-        "type": "select",
-        "label": "Type",
-        "key": "controlType",
-        "defaultValue": "select",
-        "placeholder": "Pick an options type",
-        "options": [
-          {
-            "label": "Select",
-            "value": "select"
-          },
-          {
-            "label": "Checkboxes",
-            "value": "checkbox"
-          },
-          {
-            "label": "Switches",
-            "value": "switch"
-          }
-        ]
+        "type" : "boolean",
+        "key"  : "clearValueIcon",
+        "label": "Clear Value Icon"
       },
       {
-        "type": "select",
-        "label": "Direction",
-        "key": "direction",
-        "defaultValue": "vertical",
-        "options": [
-          {
-            "label": "Horizontal",
-            "value": "horizontal"
-          },
-          {
-            "label": "Vertical",
-            "value": "vertical"
-          }
-        ],
-        "dependsOn": {
-          "setting": "optionsType",
-          "value": "checkbox"
-        }
+        "type" : "boolean",
+        "key"  : "showIcon",
+        "label": "Add Inline Icon"
       },
       {
-        "type": "select",
-        "label": "Options source",
-        "key": "optionsSource",
-        "defaultValue": "schema",
-        "placeholder": "Pick an options source",
-        "options": [
-          {
-            "label": "Schema",
-            "value": "schema"
-          },
-          {
-            "label": "Data provider",
-            "value": "provider"
-          },
-          {
-            "label": "Custom",
-            "value": "custom"
-          }
-        ]
+        "type" : "icon",
+        "key"  : "icon",
+        "label": "Icon",
+        "resetOn" : "showIcon",
+        "dependsOn" : "showIcon"
       },
       {
-        "type": "dataProvider",
-        "label": "Options provider",
-        "key": "dataProvider",
-        "required": true,
-        "dependsOn": {
-          "setting": "optionsSource",
-          "value": "provider"
-        }
+        "type" : "boolean",
+        "key"  : "customButtons",
+        "label": "Add Buttons"
       },
       {
-        "type": "field",
-        "label": "Label column",
-        "key": "labelColumn",
-        "dependsOn": {
-          "setting": "optionsSource",
-          "value": "provider"
-        }
-      },
-      {
-        "type": "field",
-        "label": "Value column",
-        "key": "valueColumn",
-        "dependsOn": {
-          "setting": "optionsSource",
-          "value": "provider"
-        }
-      },
-      {
-        "type": "options",
-        "key": "customOptions",
-        "dependsOn": {
-          "setting": "optionsSource",
-          "value": "custom"
-        }
+        "type" : "buttonConfiguration",
+        "key"  : "buttons",
+        "nested" : true,
+        "dependsOn" : "customButtons"
       },
       {
         "tag" : "style",
         "type" : "boolean",
         "key" : "useOptionColors",
         "label" : "Option Colors",
-        "defaultValue" : true
+        "defaultValue" : false
+      },
+      {
+        "tag" : "style",
+        "type" : "boolean",
+        "key" : "useOptionIcons",
+        "label" : "Option Icons",
+        "defaultValue" : false
       },
       {
         "tag" : "style",
         "type": "select",
         "label": "Options Mode",
         "key": "optionsViewMode",
-        "defaultValue": "pills",
+        "defaultValue": "text",
         "showInBar": true,
         "barStyle": "buttons",
         "options": [
           {
             "label": "Pills",
             "value": "pills",
-            "barIcon": "Button",
-            "barTitle": "1 column"
+            "barIcon": "Button"
           },
           {
             "label": "text",
             "value": "text",
-            "barIcon": "Text",
-            "barTitle": "2 columns"
+            "barIcon": "Text"
           }
         ]
       },
@@ -230,35 +382,6 @@
           {
             "label": "3 columns",
             "value": 2,
-            "barIcon": "ViewColumn",
-            "barTitle": "3 columns"
-          }
-        ]
-      },
-      {
-        "type": "select",
-        "label": "Arrangement",
-        "key": "optionsArrangement",
-        "defaultValue": 1,
-        "showInBar": true,
-        "barStyle": "buttons",
-        "dependsOn": {"setting" : "controlType", "value": "select", "invert" : true},
-        "options": [
-          {
-            "label": "1 column",
-            "value": 1,
-            "barIcon": "Stop",
-            "barTitle": "1 column"
-          },
-          {
-            "label": "2 columns",
-            "value": 2,
-            "barIcon": "ColumnTwoA",
-            "barTitle": "2 columns"
-          },
-          {
-            "label": "3 columns",
-            "value": 3,
             "barIcon": "ViewColumn",
             "barTitle": "3 columns"
           }
