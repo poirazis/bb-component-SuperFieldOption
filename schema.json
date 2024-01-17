@@ -51,7 +51,8 @@
       {
         "type": "text",
         "label": "Label",
-        "key": "label"
+        "key": "label",
+        "resetOn" : "valueType"
       },
       {
         "type": "text",
@@ -107,12 +108,8 @@
             "value": "select"
           },
           {
-            "label": "Checkboxes",
-            "value": "checkbox"
-          },
-          {
-            "label": "Switches",
-            "value": "switch"
+            "label": "Radioboxes",
+            "value": "radio"
           }
         ]
       },
@@ -185,18 +182,21 @@
           {
             "type": "filter",
             "label": "Filtering",
-            "key": "filter"
+            "key": "filter",
+            "resetOn" : "datasource"
           },
           {
             "type": "field/sortable",
             "label": "Sort column",
             "key": "sortColumn",
+            "resetOn" : "datasource",
             "placeholder": "None"
           },
           {
             "type": "select",
             "label": "Sort order",
             "key": "sortOrder",
+            "resetOn" : "datasource",
             "options": ["Ascending", "Descending"],
             "defaultValue": "Ascending"
           },
@@ -204,6 +204,7 @@
             "type": "number",
             "label": "Limit",
             "key": "limit",
+            "resetOn" : "datasource",
             "defaultValue": 10
           },
           {
@@ -294,11 +295,6 @@
           "value": true,
           "invert": true
         }
-      },
-      {
-        "type" : "boolean",
-        "key"  : "clearValueIcon",
-        "label": "Clear Value Icon"
       },
       {
         "type" : "boolean",
