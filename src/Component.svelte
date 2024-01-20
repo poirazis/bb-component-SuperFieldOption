@@ -61,7 +61,8 @@
   
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
 
-  $: valueType == "string" ? formField = formApi?.registerField(
+  $: valueType == "string" 
+  ? formField = formApi?.registerField(
     field,
     "options",
     defaultValue,
@@ -89,7 +90,7 @@
   $: cellOptions = { 
       disabled,
       readonly : readonly || disabled,
-      placeholder: placeholder || "Choose an Option", 
+      placeholder: placeholder || "Choose Option", 
       defaultValue,
       autocomplete,
       addNew,
@@ -144,14 +145,14 @@
   <div class="superField" use:styleable={$component.styles}>
 
     {#if label}
-    <label for={$component.id} class="superlabel">
-      {label}
-        {#if fieldState.error}
-          <div class="error">
-            <span>{fieldState.error}</span>
-          </div>
-        {/if}
-     </label>
+      <label for={$component.id} class="superlabel">
+        {label}
+          {#if fieldState.error}
+            <div class="error">
+              <span>{fieldState.error}</span>
+            </div>
+          {/if}
+      </label>
      {/if}
     
     <div class="inline-cells">
