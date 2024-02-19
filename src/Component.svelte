@@ -1,7 +1,7 @@
 <script>
   import { getContext , onDestroy} from "svelte";
-  import CellOptions from "../../bb_super_components_shared/src/lib/SuperCell/cells/CellOptions.svelte";
-
+  import CellOptions from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptions.svelte";
+  
   const { styleable, Provider, Block, BlockComponent } = getContext("sdk");
   const component = getContext("component");
 
@@ -129,8 +129,8 @@
   };
 
   const handleChange = ( newValue ) => {
-    onChange?.({value: newValue});
-    fieldApi?.setValue( valueType == "string" ? newValue : Number ( newValue ) );
+    onChange?.({value: newValue ? newValue : null });
+    fieldApi?.setValue( valueType == "string" ? newValue ? newValue : null  : Number ( newValue ? newValue : null ) );
   }
   
   onDestroy(() => {
@@ -162,7 +162,7 @@
         {cellOptions}
         {fieldSchema}
         value={fieldState.value}
-        on:change={(e) => handleChange(e.detail[0])}
+        on:change={(e) => handleChange(e.detail)}
         on:blur={cellState.lostFocus}
         on:addNew={ (e) => onAddNew?.({value: e.detail})}
       />
