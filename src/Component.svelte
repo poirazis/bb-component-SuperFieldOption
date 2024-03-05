@@ -8,6 +8,7 @@
   const formContext = getContext("form");
   const formStepContext = getContext("form-step");
   const labelPos = getContext("field-group");
+  const groupDisabled = getContext("field-group-disabled");
   const labelWidth = getContext("field-group-label-width");
   const formApi = formContext?.formApi;
 
@@ -23,7 +24,7 @@
 
   export let buttons = [];
 
-  export let label;
+  export let fieldLabel;
   export let span = 6;
   export let placeholder
   export let defaultValue
@@ -58,8 +59,10 @@
   let fieldSchema
 
   let cellState
+  let context = {}
   
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
+  $: label = fieldLabel || fieldSchema?.name
 
   $: valueType == "string" 
   ? formField = formApi?.registerField(
@@ -85,10 +88,11 @@
     fieldState = value?.fieldState;
     fieldApi = value?.fieldApi;
     fieldSchema = value?.fieldSchema;
+    context = { value: fieldState.value };
   });
 
   $: cellOptions = { 
-      disabled,
+      disabled : disabled || groupDisabled,
       readonly : readonly || disabled,
       placeholder: placeholder || "Choose Option", 
       defaultValue,
@@ -121,7 +125,7 @@
     normal: {
       ...$component.styles.normal,
       "flex-direction": labelPos == "left" ? "row" : "column",
-      gap: labelPos == "left" ? "0.85rem" : "0rem",
+      gap: labelPos == "left" ? "0.5rem" : "0rem",
       "grid-column": labelPos ? "span " + span : "span 1",
       "--label-width":
         labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
@@ -131,6 +135,7 @@
   const handleChange = ( newValue ) => {
     onChange?.({value: newValue ? newValue : null });
     fieldApi?.setValue( valueType == "string" ? newValue ? newValue : null  : Number ( newValue ? newValue : null ) );
+    context = { value: newValue };
   }
   
   onDestroy(() => {
@@ -143,17 +148,21 @@
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <Block>
   <div class="superField" use:styleable={$component.styles}>
+    <Provider data={context}>
+      {#if label}
+      <label for="superCell"
+        class="superlabel"
+        style:flex-direction={labelPos == "left" ? "column" : "row"}
 
-    {#if label}
-      <label for={$component.id} class="superlabel">
-        {label}
-          {#if fieldState.error}
-            <div class="error">
-              <span>{fieldState.error}</span>
-            </div>
-          {/if}
+      >
+        {label} 
+        {#if fieldState.error}
+          <div class="error">
+            <span>{fieldState.error}</span>
+          </div>
+        {/if}
       </label>
-     {/if}
+    {/if}
     
     <div class="inline-cells">
       <CellOptions
@@ -171,26 +180,24 @@
         <div
           class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
         >
-          <Provider data={ { value : fieldState.value }} >
-            {#each buttons as { text, onClick , quiet, disabled, type }}
-              <BlockComponent
-                type = "plugin/bb-component-SuperButton"
-                props = {{
-                  quiet,
-                  disabled, 
-                  size: "M",
-                  text,
-                  onClick,
-                  emphasized : true,
-                  selected: type == "cta"
-                }}>
-                </BlockComponent>
-              {/each}
-          </Provider>
+          {#each buttons as { text, onClick , quiet, disabled, type }}
+            <BlockComponent
+              type = "plugin/bb-component-SuperButton"
+              props = {{
+                quiet,
+                disabled, 
+                size: "M",
+                text,
+                onClick,
+                emphasized : true,
+                selected: type == "cta"
+              }}>
+              </BlockComponent>
+            {/each}
         </div>
       {/if}
     </div>
-    
+  </Provider>
   </div>
 </Block>
 

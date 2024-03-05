@@ -51,8 +51,10 @@
       {
         "type": "text",
         "label": "Label",
-        "key": "label",
-        "resetOn" : "valueType"
+        "key": "fieldLabel",
+        "resetOn" : ["field", "numfield"],
+        "placeholder" : "Field Name"
+
       },
       {
         "type": "text",
@@ -120,6 +122,7 @@
         "defaultValue": 1,
         "showInBar": false,
         "barStyle": "buttons",
+        "resetOn" : "controlType",
         "dependsOn": {"setting" : "controlType", "value": "select", "invert" : true},
         "options": [
           {
@@ -261,8 +264,23 @@
       },
       {
         "type": "boolean",
+        "label": "Debounced",
+        "key": "debounced",
+        "defaultValue": false
+      },
+      {
+        "type": "number",
+        "label": "Debounce Delay (ms)",
+        "key": "debounceDelay",
+        "minValue" : "200",
+        "defaultValue": 750,
+        "dependsOn": "debounced"
+      },
+      {
+        "type": "boolean",
         "label": "Autocomplete",
         "key": "autocomplete",
+        "resetOn" : "controlType",
         "defaultValue": false,
         "dependsOn": {
           "setting": "controlType",
@@ -271,12 +289,12 @@
       },
       {
         "type": "boolean",
-        "label": "Allow Input",
+        "label": "Allow New Value",
         "key": "addNew",
         "defaultValue": false,
         "dependsOn": {
-          "setting": "controlType",
-          "value": "select"
+          "setting": "autocomplete",
+          "value": true
         }
       },
       {
