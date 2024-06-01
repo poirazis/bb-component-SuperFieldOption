@@ -1,88 +1,97 @@
 <script>
-  import { getContext , onDestroy} from "svelte";
+  import { getContext, onDestroy } from "svelte";
   import CellOptions from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptions.svelte";
-  
+  import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
+
   const { styleable, Provider, Block, BlockComponent } = getContext("sdk");
   const component = getContext("component");
 
   const formContext = getContext("form");
   const formStepContext = getContext("form-step");
-  const labelPos = getContext("field-group");
+  const groupLabelPosition = getContext("field-group");
   const groupDisabled = getContext("field-group-disabled");
   const labelWidth = getContext("field-group-label-width");
   const formApi = formContext?.formApi;
 
-  export let valueType = "string"
+  export let valueType = "string";
   export let field;
-  export let numfield
-  export let onChange
-  export let validation
-  export let numvalidation
-  export let controlType = "select"
-  
-  export let customButtons = []
+  export let numfield;
+  export let onChange;
+  export let debounced;
+  export let debounceDelay;
+  export let validation;
+  export let numvalidation;
+  export let controlType = "select";
+
+  export let customButtons = [];
 
   export let buttons = [];
 
   export let fieldLabel;
+  export let labelPosition;
   export let span = 6;
-  export let placeholder
-  export let defaultValue
-  export let disabled
-  export let readonly
+  export let placeholder;
+  export let defaultValue;
+  export let disabled;
+  export let readonly;
 
-  export let icon
+  export let icon;
 
-  export let optionsSource
-  export let datasource
-  export let valueColumn
-  export let labelColumn
-  export let colorColumn
-  export let iconColumn
-  export let limit
-  export let sortColumn
-  export let sortOrder
-  export let filter
-  export let customOptions = []
-  export let optionsArrangement
-  export let useOptionColors
-  export let useOptionIcons
-  export let optionsViewMode
-  export let autocomplete
-  export let addNew
-  export let onAddNew
+  export let optionsSource;
+  export let datasource;
+  export let valueColumn;
+  export let labelColumn;
+  export let colorTemplate;
+  export let iconTemplate;
+  export let limit;
+  export let sortColumn;
+  export let sortOrder;
+  export let filter;
+  export let prefetch;
+  export let cache;
+  export let fullTable;
+  export let columnList;
+  export let customOptions = [];
+  export let optionsArrangement;
+  export let useOptionColors;
+  export let optionsIcon;
+  export let optionsViewMode;
+  export let autocomplete;
+  export let addNew;
+  export let onAddNew;
 
   let formField;
   let formStep;
   let fieldState;
   let fieldApi;
-  let fieldSchema
+  let fieldSchema;
 
-  let cellState
-  let context = {}
-  
+  let cellState;
+  let context = {};
+
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
-  $: label = fieldLabel || fieldSchema?.name
+  $: label = fieldLabel || fieldSchema?.name;
+  $: labelPos = labelPosition ? labelPosition : groupLabelPosition || "left";
 
-  $: valueType == "string" 
-  ? formField = formApi?.registerField(
-    field,
-    "options",
-    defaultValue,
-    disabled,
-    readonly,
-    validation,
-    formStep
-  )
-  : formField = formApi?.registerField(
-    numfield,
-    "number",
-    defaultValue,
-    disabled,
-    readonly,
-    numvalidation,
-    formStep
-  )
+  $: valueType == "string"
+    ? (formField = formApi?.registerField(
+        field,
+        "options",
+        defaultValue,
+        disabled,
+        readonly,
+        validation,
+        formStep
+      ))
+    : (formField = formApi?.registerField(
+        numfield,
+        "number",
+        defaultValue,
+        disabled,
+        readonly,
+        numvalidation,
+        formStep
+      ));
 
   $: unsubscribe = formField?.subscribe((value) => {
     fieldState = value?.fieldState;
@@ -91,34 +100,39 @@
     context = { value: fieldState.value };
   });
 
-  $: cellOptions = { 
-      disabled : disabled || groupDisabled,
-      readonly : readonly || disabled,
-      placeholder: placeholder || "Choose Option", 
-      defaultValue,
-      autocomplete,
-      addNew,
-      padding: "0.5rem",
-      error: fieldState.error,
-      controlType,
-      optionsArrangement,
-      optionsSource,
-      datasource,
-      filter,
-      sortColumn,
-      sortOrder,
-      limit,
-      valueColumn,
-      labelColumn,
-      colorColumn,
-      iconColumn,
-      useOptionColors,
-      useOptionIcons,
-      optionsViewMode,
-      customOptions,
-      role: "formInput", 
-      icon,
-    }
+  $: cellOptions = {
+    disabled: disabled || groupDisabled || fieldState?.disabled,
+    readonly: readonly || fieldState?.readonly,
+    placeholder: placeholder || "Choose Option",
+    debounce: debounced ? debounceDelay : false,
+    defaultValue,
+    autocomplete,
+    addNew,
+    padding: "0.5rem",
+    error: fieldState.error,
+    controlType,
+    optionsArrangement,
+    optionsSource,
+    datasource,
+    filter,
+    sortColumn,
+    sortOrder,
+    limit,
+    prefetch,
+    cache,
+    fullTable,
+    columnList,
+    valueColumn,
+    labelColumn,
+    colorTemplate,
+    iconTemplate,
+    useOptionColors,
+    optionsIcon,
+    optionsViewMode,
+    customOptions,
+    role: "formInput",
+    icon,
+  };
 
   $: $component.styles = {
     ...$component.styles,
@@ -132,38 +146,40 @@
     },
   };
 
-  const handleChange = ( newValue ) => {
-    onChange?.({value: newValue ? newValue : null });
-    fieldApi?.setValue( valueType == "string" ? newValue ? newValue : null  : Number ( newValue ? newValue : null ) );
+  const handleChange = (newValue) => {
+    onChange?.({ value: newValue ? newValue : null });
+    console.log(newValue);
+    fieldApi?.setValue(
+      valueType == "string"
+        ? newValue
+          ? newValue
+          : null
+        : Number(newValue ? newValue : null)
+    );
     context = { value: newValue };
-  }
-  
+  };
+
   onDestroy(() => {
-    fieldApi?.deregister()
-    unsubscribe?.()
-  })
+    fieldApi?.deregister();
+    unsubscribe?.();
+  });
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <Block>
   <div class="superField" use:styleable={$component.styles}>
-    <Provider data={context}>
-      {#if label}
-      <label for="superCell"
-        class="superlabel"
-        style:flex-direction={labelPos == "left" ? "column" : "row"}
-
-      >
-        {label} 
+    {#if label}
+      <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
+        {label}
         {#if fieldState.error}
-          <div class="error">
+          <div class="error" class:left={labelPos == "left"}>
             <span>{fieldState.error}</span>
           </div>
         {/if}
       </label>
     {/if}
-    
+
     <div class="inline-cells">
       <CellOptions
         id={$component.id}
@@ -173,70 +189,32 @@
         value={fieldState.value}
         on:change={(e) => handleChange(e.detail)}
         on:blur={cellState.lostFocus}
-        on:addNew={ (e) => onAddNew?.({value: e.detail})}
+        on:addNew={(e) => onAddNew?.({ value: e.detail })}
       />
 
       {#if customButtons && buttons?.length}
-        <div
-          class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        >
-          {#each buttons as { text, onClick , quiet, disabled, type }}
-            <BlockComponent
-              type = "plugin/bb-component-SuperButton"
-              props = {{
-                quiet,
-                disabled, 
-                size: "M",
-                text,
-                onClick,
-                emphasized : true,
-                selected: type == "cta"
-              }}>
-              </BlockComponent>
+        <Provider data={context}>
+          <div
+            class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
+          >
+            {#each buttons as { text, onClick, quiet, type, icon }}
+              <BlockComponent
+                type="plugin/bb-component-SuperButton"
+                props={{
+                  quiet,
+                  disabled,
+                  size: "M",
+                  text,
+                  onClick,
+                  icon,
+                  emphasized: true,
+                  selected: type == "cta",
+                }}
+              ></BlockComponent>
             {/each}
-        </div>
+          </div>
+        </Provider>
       {/if}
     </div>
-  </Provider>
   </div>
 </Block>
-
-<style>
-  .superField {
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-    min-width: 0;
-  }
-
-  .superField:focus {
-    outline: none;
-  }
-  .superlabel {
-    display: flex;
-    justify-content: space-between;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: var(--label-width);
-    max-width: var(--label-width);
-    font-size: 12px;
-    line-height: 1.75rem;
-    font-weight: 400;
-    color: var(--spectrum-global-color-gray-700);
-  }
-
-  .inline-cells {
-    flex: 1;
-    display: flex;
-    justify-items: stretch;
-    height: 2rem;
-  }
-  .error {
-    font-size: 12px;
-    line-height: 1.75rem;
-    color: var(--spectrum-global-color-red-700);
-  }
-</style>
-
-

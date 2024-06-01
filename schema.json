@@ -5,11 +5,11 @@
     "name": "bb-component-SuperFieldOption",
     "friendlyName": "Super Field - Option",
     "description": "An Option Input Field component for Budibase",
-    "icon": "Menu",
+    "icon": "SelectBox",
     "requiredAncestors": ["form"],
-    "block" : true,
-    "ejectable" : false,
-    "context" : [
+    "block": true,
+    "ejectable": false,
+    "context": [
       {
         "type": "static",
         "values": [
@@ -17,44 +17,43 @@
             "label": "Value",
             "key": "value",
             "type": "string"
-          } 
+          }
         ]
       }
     ],
     "settings": [
       {
-        "type" : "select",
-        "label"  : "Field Type",
-        "key" : "valueType",
-        "defaultValue" : "string",
-        "options" : [
-          {"label" : "String/Option" , "value" : "string" },
-          {"label" : "Number" , "value" : "int" }
+        "type": "select",
+        "label": "Field Type",
+        "key": "valueType",
+        "defaultValue": "string",
+        "options": [
+          { "label": "String/Option", "value": "string" },
+          { "label": "Number", "value": "int" }
         ]
       },
       {
         "type": "field/options",
         "label": "Field",
         "key": "field",
-        "resetOn" : "valueType",
+        "resetOn": "valueType",
         "required": true,
-        "dependsOn" : {"setting" : "valueType", "value" : "string" }
+        "dependsOn": { "setting": "valueType", "value": "string" }
       },
       {
         "type": "field/number",
         "label": "Field",
-        "resetOn" : "valueType",
+        "resetOn": "valueType",
         "key": "numfield",
         "required": true,
-        "dependsOn" : {"setting" : "valueType", "value" : "int" }
+        "dependsOn": { "setting": "valueType", "value": "int" }
       },
       {
         "type": "text",
         "label": "Label",
         "key": "fieldLabel",
-        "resetOn" : ["field", "numfield"],
-        "placeholder" : "Field Name"
-
+        "resetOn": ["field", "numfield"],
+        "placeholder": "Field Name"
       },
       {
         "type": "text",
@@ -77,15 +76,15 @@
         "type": "validation/string",
         "label": "Validation",
         "key": "validation",
-        "resetOn" : "valueType",
-        "dependsOn" : {"setting" : "valueType", "value" : "string" }
+        "resetOn": "valueType",
+        "dependsOn": { "setting": "valueType", "value": "string" }
       },
       {
         "type": "validation/number",
         "label": "Validation",
         "key": "numvalidation",
-        "resetOn" : "valueType",
-        "dependsOn" : {"setting" : "valueType", "value" : "int" }
+        "resetOn": "valueType",
+        "dependsOn": { "setting": "valueType", "value": "int" }
       },
       {
         "type": "event",
@@ -122,8 +121,12 @@
         "defaultValue": 1,
         "showInBar": false,
         "barStyle": "buttons",
-        "resetOn" : "controlType",
-        "dependsOn": {"setting" : "controlType", "value": "select", "invert" : true},
+        "resetOn": "controlType",
+        "dependsOn": {
+          "setting": "controlType",
+          "value": "select",
+          "invert": true
+        },
         "options": [
           {
             "label": "1 column",
@@ -167,39 +170,42 @@
         ]
       },
       {
-        "section" : true,
-        "name" : "Data Settings",
-        "dependsOn" : { "setting" : "optionsSource", "value" : "data" },
-        "settings" : [
+        "section": true,
+        "name": "Data Settings",
+        "dependsOn": { "setting": "optionsSource", "value": "data" },
+        "settings": [
+          {
+            "type": "boolean",
+            "key": "fullTable",
+            "label": "Super Table",
+            "resetOn": ["optionsSource", "controlType"],
+            "dependsOn": { "setting": "controlType", "value": "select" },
+            "defaultValue": false
+          },
           {
             "type": "dataSource",
             "label": "Data",
             "key": "datasource",
-            "resetOn" : "optionsSource",
-            "required": true,
-            "dependsOn": {
-              "setting": "optionsSource",
-              "value": "data"
-            }
+            "resetOn": "optionsSource"
           },
           {
             "type": "filter",
             "label": "Filtering",
             "key": "filter",
-            "resetOn" : "datasource"
+            "resetOn": "datasource"
           },
           {
             "type": "field/sortable",
             "label": "Sort column",
             "key": "sortColumn",
-            "resetOn" : "datasource",
+            "resetOn": "datasource",
             "placeholder": "None"
           },
           {
             "type": "select",
             "label": "Sort order",
             "key": "sortOrder",
-            "resetOn" : "datasource",
+            "resetOn": "datasource",
             "options": ["Ascending", "Descending"],
             "defaultValue": "Ascending"
           },
@@ -207,49 +213,62 @@
             "type": "number",
             "label": "Limit",
             "key": "limit",
-            "resetOn" : "datasource",
+            "resetOn": "datasource",
             "defaultValue": 10
           },
           {
             "type": "field",
             "label": "Value column",
             "key": "valueColumn",
-            "required": true,
-            "resetOn" : "datasource",
-            "dependsOn": {
-              "setting": "optionsSource",
-              "value": "data"
-            }
+            "resetOn": ["datasource", "optionsSource"],
+            "dependsOn": { "setting": "optionsSource", "value": "data" },
+            "required": true
           },
           {
             "type": "field",
             "label": "Label column",
             "key": "labelColumn",
-            "resetOn" : "datasource",
+            "resetOn": "datasource",
             "dependsOn": {
-              "setting": "optionsSource",
-              "value": "data"
+              "setting": "fullTable",
+              "value": true,
+              "invert": true
             }
           },
           {
-            "type": "field",
-            "label": "Color column",
-            "key": "colorColumn",
-            "resetOn" : "datasource",
+            "type": "boolean",
+            "key": "prefetch",
+            "label": "Prefetch",
             "dependsOn": {
-              "setting": "optionsSource",
-              "value": "data"
-            }
+              "setting": "fullTable",
+              "value": true,
+              "invert": true
+            },
+            "defaultValue": true
           },
           {
-            "type": "field",
-            "label": "Icon column",
-            "key": "iconColumn",
-            "resetOn" : "datasource",
+            "type": "boolean",
+            "key": "cache",
+            "label": "Cache",
             "dependsOn": {
-              "setting": "optionsSource",
-              "value": "data"
-            }
+              "setting": "fullTable",
+              "value": true,
+              "invert": true
+            },
+            "defaultValue": true
+          }
+        ]
+      },
+      {
+        "section": true,
+        "dependsOn": { "setting": "fullTable", "value": true },
+        "name": "Super Table Options",
+        "settings": [
+          {
+            "type": "columns",
+            "label": "Columns",
+            "key": "columnList",
+            "resetOn": "datasource"
           }
         ]
       },
@@ -272,7 +291,7 @@
         "type": "number",
         "label": "Debounce Delay (ms)",
         "key": "debounceDelay",
-        "minValue" : "200",
+        "minValue": "200",
         "defaultValue": 750,
         "dependsOn": "debounced"
       },
@@ -280,7 +299,7 @@
         "type": "boolean",
         "label": "Autocomplete",
         "key": "autocomplete",
-        "resetOn" : "controlType",
+        "resetOn": "controlType",
         "defaultValue": false,
         "dependsOn": {
           "setting": "controlType",
@@ -315,44 +334,63 @@
         }
       },
       {
-        "type" : "boolean",
-        "key"  : "showIcon",
-        "label": "Add Inline Icon"
+        "type": "icon",
+        "key": "icon",
+        "label": "Inline Icon",
+        "dependsOn": { "setting": "controlType", "value": "select" }
       },
       {
-        "type" : "icon",
-        "key"  : "icon",
-        "label": "Icon",
-        "resetOn" : "showIcon",
-        "dependsOn" : "showIcon"
-      },
-      {
-        "type" : "boolean",
-        "key"  : "customButtons",
+        "type": "boolean",
+        "key": "customButtons",
         "label": "Add Buttons"
       },
       {
-        "type" : "buttonConfiguration",
-        "key"  : "buttons",
-        "nested" : true,
-        "dependsOn" : "customButtons"
+        "type": "buttonConfiguration",
+        "key": "buttons",
+        "nested": true,
+        "dependsOn": "customButtons"
       },
       {
-        "tag" : "style",
-        "type" : "boolean",
-        "key" : "useOptionColors",
-        "label" : "Option Colors",
-        "defaultValue" : false
+        "tag": "style",
+        "type": "boolean",
+        "key": "useOptionColors",
+        "label": "Option Colors",
+        "defaultValue": false
       },
       {
-        "tag" : "style",
-        "type" : "boolean",
-        "key" : "useOptionIcons",
-        "label" : "Option Icons",
-        "defaultValue" : false
+        "tag": "style",
+        "type": "text",
+        "label": "Option Color",
+        "key": "colorTemplate",
+        "placeholder": "{{ row }}",
+        "nested": true,
+        "resetOn": "datasource",
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "data"
+        }
       },
       {
-        "tag" : "style",
+        "tag": "style",
+        "type": "icon",
+        "key": "optionsIcon",
+        "label": "Options Icon"
+      },
+      {
+        "tag": "style",
+        "type": "text",
+        "label": "Option Icon",
+        "key": "iconTemplate",
+        "placeholder": "{{ row }}",
+        "nested": true,
+        "resetOn": "datasource",
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "data"
+        }
+      },
+      {
+        "tag": "style",
         "type": "select",
         "label": "Options Mode",
         "key": "optionsViewMode",
@@ -373,7 +411,7 @@
         ]
       },
       {
-        "tag" : "style",
+        "tag": "style",
         "type": "select",
         "label": "Layout",
         "key": "span",
@@ -398,6 +436,34 @@
             "value": 2,
             "barIcon": "ViewColumn",
             "barTitle": "3 columns"
+          }
+        ]
+      },
+      {
+        "tag": "style",
+        "type": "select",
+        "label": "Label Position",
+        "key": "labelPosition",
+        "showInBar": true,
+        "barStyle": "buttons",
+        "options": [
+          {
+            "label": "Auto",
+            "value": false,
+            "barIcon": "Group",
+            "barTitle": "Field Group"
+          },
+          {
+            "label": "Above",
+            "value": "above",
+            "barIcon": "MarginTop",
+            "barTitle": "Above"
+          },
+          {
+            "label": "Left",
+            "value": "left",
+            "barIcon": "MarginLeft",
+            "barTitle": "Left"
           }
         ]
       }
