@@ -1,39 +1,42 @@
 <script>
   import { getContext, onDestroy } from "svelte";
   import CellOptions from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptions.svelte";
+  import CellOptionsAdvanced from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptionsAdvanced.svelte";
+  import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
   import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
+  import "../../bb_super_components_shared/src/lib/SuperTableCells/CellCommon.css";
 
-  const { styleable, Provider, Block, BlockComponent } = getContext("sdk");
+  const { styleable, enrichButtonActions } = getContext("sdk");
   const component = getContext("component");
+  const allContext = getContext("context");
 
   const formContext = getContext("form");
   const formStepContext = getContext("form-step");
   const groupLabelPosition = getContext("field-group");
-  const groupDisabled = getContext("field-group-disabled");
   const labelWidth = getContext("field-group-label-width");
+  const groupColumns = getContext("field-group-columns");
+  const groupDisabled = getContext("field-group-disabled");
   const formApi = formContext?.formApi;
 
-  export let valueType = "string";
   export let field;
-  export let numfield;
   export let onChange;
   export let debounced;
   export let debounceDelay;
   export let validation;
-  export let numvalidation;
   export let controlType = "select";
-
-  export let customButtons = [];
+  export let role = "formInput";
+  export let labelPosition = "fieldGroup";
+  export let showDirty;
 
   export let buttons = [];
 
-  export let fieldLabel;
-  export let labelPosition;
+  export let label;
   export let span = 6;
   export let placeholder;
   export let defaultValue;
   export let disabled;
   export let readonly;
+  export let autofocus;
 
   export let icon;
 
@@ -47,57 +50,41 @@
   export let sortColumn;
   export let sortOrder;
   export let filter;
-  export let prefetch;
-  export let cache;
-  export let fullTable;
-  export let columnList;
   export let customOptions = [];
-  export let optionsArrangement;
+  export let direction;
   export let useOptionColors;
   export let optionsIcon;
   export let optionsViewMode;
   export let autocomplete;
   export let addNew;
-  export let onAddNew;
 
   let formField;
   let formStep;
   let fieldState;
   let fieldApi;
   let fieldSchema;
-
-  let cellState;
-  let context = {};
+  let value;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
-  $: label = fieldLabel || fieldSchema?.name;
-  $: labelPos = labelPosition ? labelPosition : groupLabelPosition || "left";
+  $: labelPos =
+    groupLabelPosition && labelPosition == "fieldGroup"
+      ? groupLabelPosition
+      : labelPosition;
 
-  $: valueType == "string"
-    ? (formField = formApi?.registerField(
-        field,
-        "options",
-        defaultValue,
-        disabled,
-        readonly,
-        validation,
-        formStep
-      ))
-    : (formField = formApi?.registerField(
-        numfield,
-        "number",
-        defaultValue,
-        disabled,
-        readonly,
-        numvalidation,
-        formStep
-      ));
+  $: formField = formApi?.registerField(
+    field,
+    "options",
+    defaultValue,
+    disabled,
+    readonly,
+    validation,
+    formStep
+  );
 
   $: unsubscribe = formField?.subscribe((value) => {
     fieldState = value?.fieldState;
     fieldApi = value?.fieldApi;
     fieldSchema = value?.fieldSchema;
-    context = { value: fieldState.value };
   });
 
   $: cellOptions = {
@@ -111,17 +98,13 @@
     padding: "0.5rem",
     error: fieldState.error,
     controlType,
-    optionsArrangement,
+    direction,
     optionsSource,
     datasource,
     filter,
     sortColumn,
     sortOrder,
     limit,
-    prefetch,
-    cache,
-    fullTable,
-    columnList,
     valueColumn,
     labelColumn,
     colorTemplate,
@@ -130,8 +113,9 @@
     optionsIcon,
     optionsViewMode,
     customOptions,
-    role: "formInput",
+    role,
     icon,
+    showDirty,
   };
 
   $: $component.styles = {
@@ -139,24 +123,12 @@
     normal: {
       ...$component.styles.normal,
       "flex-direction": labelPos == "left" ? "row" : "column",
+      "align-items": "stretch",
       gap: labelPos == "left" ? "0.5rem" : "0rem",
-      "grid-column": labelPos ? "span " + span : "span 1",
+      "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
       "--label-width":
         labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
     },
-  };
-
-  const handleChange = (newValue) => {
-    onChange?.({ value: newValue ? newValue : null });
-    console.log(newValue);
-    fieldApi?.setValue(
-      valueType == "string"
-        ? newValue
-          ? newValue
-          : null
-        : Number(newValue ? newValue : null)
-    );
-    context = { value: newValue };
   };
 
   onDestroy(() => {
@@ -167,54 +139,65 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<Block>
-  <div class="superField" use:styleable={$component.styles}>
-    {#if label}
-      <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
-        {label}
-        {#if fieldState.error}
-          <div class="error" class:left={labelPos == "left"}>
-            <span>{fieldState.error}</span>
-          </div>
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<div class="superField" use:styleable={$component.styles}>
+  {#if label && labelPos}
+    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
+      <span>
+        {#if icon && controlType != "select"}
+          <i class={icon} />
         {/if}
-      </label>
-    {/if}
+        {label}
+      </span>
+      {#if fieldState.error}
+        <div class="error" class:left={labelPos == "left"}>
+          <span>{fieldState.error}</span>
+        </div>
+      {/if}
+    </label>
+  {/if}
 
-    <div class="inline-cells">
+  <div class="inline-cells">
+    {#if controlType == "select"}
       <CellOptions
-        id={$component.id}
-        bind:cellState
         {cellOptions}
         {fieldSchema}
-        value={fieldState.value}
-        on:change={(e) => handleChange(e.detail)}
-        on:blur={cellState.lostFocus}
-        on:addNew={(e) => onAddNew?.({ value: e.detail })}
+        {value}
+        {autofocus}
+        on:change={(e) => {
+          onChange?.({ value: e.detail });
+          fieldApi?.setValue(e.detail);
+        }}
       />
+    {:else}
+      <CellOptionsAdvanced
+        {cellOptions}
+        {fieldSchema}
+        {value}
+        {autofocus}
+        on:change={(e) => {
+          onChange?.({ value: e.detail });
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+    {/if}
 
-      {#if customButtons && buttons?.length}
-        <Provider data={context}>
-          <div
-            class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-          >
-            {#each buttons as { text, onClick, quiet, type, icon }}
-              <BlockComponent
-                type="plugin/bb-component-SuperButton"
-                props={{
-                  quiet,
-                  disabled,
-                  size: "M",
-                  text,
-                  onClick,
-                  icon,
-                  emphasized: true,
-                  selected: type == "cta",
-                }}
-              ></BlockComponent>
-            {/each}
-          </div>
-        </Provider>
-      {/if}
-    </div>
+    {#if buttons?.length}
+      <div class="inline-buttons" class:vertical={controlType != "select"}>
+        {#each buttons as { text, onClick, quiet, disabled, type, size }}
+          <SuperButton
+            {quiet}
+            {disabled}
+            {size}
+            {type}
+            {text}
+            on:click={enrichButtonActions(
+              onClick,
+              $allContext
+            )({ value: fieldState.value })}
+          />
+        {/each}
+      </div>
+    {/if}
   </div>
-</Block>
+</div>
