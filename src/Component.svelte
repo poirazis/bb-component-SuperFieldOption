@@ -1,68 +1,77 @@
 <script>
-  import { getContext , onDestroy} from "svelte";
-  import CellOptions from "../../bb_super_components_shared/src/lib/SuperCell/cells/CellOptions.svelte";
+  import { getContext, onDestroy } from "svelte";
+  import CellOptions from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptions.svelte";
+  import CellOptionsAdvanced from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptionsAdvanced.svelte";
+  import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
+  import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
+  import "../../bb_super_components_shared/src/lib/SuperTableCells/CellCommon.css";
 
-  const { styleable, Provider, Block, BlockComponent } = getContext("sdk");
+  const { styleable, enrichButtonActions } = getContext("sdk");
   const component = getContext("component");
+  const allContext = getContext("context");
 
   const formContext = getContext("form");
   const formStepContext = getContext("form-step");
-  const labelPos = getContext("field-group");
+  const groupLabelPosition = getContext("field-group");
   const labelWidth = getContext("field-group-label-width");
+  const groupColumns = getContext("field-group-columns");
+  const groupDisabled = getContext("field-group-disabled");
   const formApi = formContext?.formApi;
 
-  export let valueType = "string"
   export let field;
-  export let numfield
-  export let onChange
-  export let validation
-  export let numvalidation
-  export let controlType = "select"
-  
-  export let customButtons = []
+  export let onChange;
+  export let debounced;
+  export let debounceDelay;
+  export let validation;
+  export let controlType = "select";
+  export let role = "formInput";
+  export let labelPosition = "fieldGroup";
+  export let showDirty;
 
   export let buttons = [];
 
   export let label;
   export let span = 6;
-  export let placeholder
-  export let defaultValue
-  export let disabled
-  export let readonly
+  export let placeholder;
+  export let defaultValue;
+  export let disabled;
+  export let readonly;
+  export let autofocus;
 
-  export let icon
+  export let icon;
 
-  export let optionsSource
-  export let datasource
-  export let valueColumn
-  export let labelColumn
-  export let colorColumn
-  export let iconColumn
-  export let limit
-  export let sortColumn
-  export let sortOrder
-  export let filter
-  export let customOptions = []
-  export let optionsArrangement
-  export let useOptionColors
-  export let useOptionIcons
-  export let optionsViewMode
-  export let autocomplete
-  export let addNew
-  export let onAddNew
+  export let optionsSource;
+  export let datasource;
+  export let valueColumn;
+  export let labelColumn;
+  export let colorTemplate;
+  export let iconTemplate;
+  export let limit;
+  export let sortColumn;
+  export let sortOrder;
+  export let filter;
+  export let customOptions = [];
+  export let direction;
+  export let useOptionColors;
+  export let optionsIcon;
+  export let optionsViewMode;
+  export let autocomplete;
+  export let addNew;
 
   let formField;
   let formStep;
   let fieldState;
   let fieldApi;
-  let fieldSchema
+  let fieldSchema;
+  let value;
 
-  let cellState
-  
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
+  $: labelPos =
+    groupLabelPosition && labelPosition == "fieldGroup"
+      ? groupLabelPosition
+      : labelPosition;
 
-  $: valueType == "string" 
-  ? formField = formApi?.registerField(
+  $: formField = formApi?.registerField(
     field,
     "options",
     defaultValue,
@@ -70,16 +79,7 @@
     readonly,
     validation,
     formStep
-  )
-  : formField = formApi?.registerField(
-    numfield,
-    "number",
-    defaultValue,
-    disabled,
-    readonly,
-    numvalidation,
-    formStep
-  )
+  );
 
   $: unsubscribe = formField?.subscribe((value) => {
     fieldState = value?.fieldState;
@@ -87,149 +87,117 @@
     fieldSchema = value?.fieldSchema;
   });
 
-  $: cellOptions = { 
-      disabled,
-      readonly : readonly || disabled,
-      placeholder: placeholder || "Choose Option", 
-      defaultValue,
-      autocomplete,
-      addNew,
-      padding: "0.5rem",
-      error: fieldState.error,
-      controlType,
-      optionsArrangement,
-      optionsSource,
-      datasource,
-      filter,
-      sortColumn,
-      sortOrder,
-      limit,
-      valueColumn,
-      labelColumn,
-      colorColumn,
-      iconColumn,
-      useOptionColors,
-      useOptionIcons,
-      optionsViewMode,
-      customOptions,
-      role: "formInput", 
-      icon,
-    }
+  $: cellOptions = {
+    disabled: disabled || groupDisabled || fieldState?.disabled,
+    readonly: readonly || fieldState?.readonly,
+    placeholder: placeholder || "Choose Option",
+    debounce: debounced ? debounceDelay : false,
+    defaultValue,
+    autocomplete,
+    addNew,
+    padding: "0.5rem",
+    error: fieldState.error,
+    controlType,
+    direction,
+    optionsSource,
+    datasource,
+    filter,
+    sortColumn,
+    sortOrder,
+    limit,
+    valueColumn,
+    labelColumn,
+    colorTemplate,
+    iconTemplate,
+    useOptionColors,
+    optionsIcon,
+    optionsViewMode,
+    customOptions,
+    role,
+    icon,
+    showDirty,
+  };
 
   $: $component.styles = {
     ...$component.styles,
     normal: {
       ...$component.styles.normal,
       "flex-direction": labelPos == "left" ? "row" : "column",
-      gap: labelPos == "left" ? "0.85rem" : "0rem",
-      "grid-column": labelPos ? "span " + span : "span 1",
+      "align-items": "stretch",
+      gap: labelPos == "left" ? "0.5rem" : "0rem",
+      "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
       "--label-width":
         labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
     },
   };
 
-  const handleChange = ( newValue ) => {
-    onChange?.({value: newValue});
-    fieldApi?.setValue( valueType == "string" ? newValue : Number ( newValue ) );
-  }
-  
   onDestroy(() => {
-    fieldApi?.deregister()
-    unsubscribe?.()
-  })
+    fieldApi?.deregister();
+    unsubscribe?.();
+  });
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-<Block>
-  <div class="superField" use:styleable={$component.styles}>
-
-    {#if label}
-      <label for={$component.id} class="superlabel">
+<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+<div class="superField" use:styleable={$component.styles}>
+  {#if label && labelPos}
+    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
+      <span>
+        {#if icon && controlType != "select"}
+          <i class={icon} />
+        {/if}
         {label}
-          {#if fieldState.error}
-            <div class="error">
-              <span>{fieldState.error}</span>
-            </div>
-          {/if}
-      </label>
-     {/if}
-    
-    <div class="inline-cells">
-      <CellOptions
-        id={$component.id}
-        bind:cellState
-        {cellOptions}
-        {fieldSchema}
-        value={fieldState.value}
-        on:change={(e) => handleChange(e.detail[0])}
-        on:blur={cellState.lostFocus}
-        on:addNew={ (e) => onAddNew?.({value: e.detail})}
-      />
-
-      {#if customButtons && buttons?.length}
-        <div
-          class="spectrum-ActionGroup spectrum-ActionGroup--compact spectrum-ActionGroup--sizeM"
-        >
-          <Provider data={ { value : fieldState.value }} >
-            {#each buttons as { text, onClick , quiet, disabled, type }}
-              <BlockComponent
-                type = "plugin/bb-component-SuperButton"
-                props = {{
-                  quiet,
-                  disabled, 
-                  size: "M",
-                  text,
-                  onClick,
-                  emphasized : true,
-                  selected: type == "cta"
-                }}>
-                </BlockComponent>
-              {/each}
-          </Provider>
+      </span>
+      {#if fieldState.error}
+        <div class="error" class:left={labelPos == "left"}>
+          <span>{fieldState.error}</span>
         </div>
       {/if}
-    </div>
-    
+    </label>
+  {/if}
+
+  <div class="inline-cells">
+    {#if controlType == "select"}
+      <CellOptions
+        {cellOptions}
+        {fieldSchema}
+        {value}
+        {autofocus}
+        on:change={(e) => {
+          onChange?.({ value: e.detail });
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+    {:else}
+      <CellOptionsAdvanced
+        {cellOptions}
+        {fieldSchema}
+        {value}
+        {autofocus}
+        on:change={(e) => {
+          onChange?.({ value: e.detail });
+          fieldApi?.setValue(e.detail);
+        }}
+      />
+    {/if}
+
+    {#if buttons?.length}
+      <div class="inline-buttons" class:vertical={controlType != "select"}>
+        {#each buttons as { text, onClick, quiet, disabled, type, size }}
+          <SuperButton
+            {quiet}
+            {disabled}
+            {size}
+            {type}
+            {text}
+            on:click={enrichButtonActions(
+              onClick,
+              $allContext
+            )({ value: fieldState.value })}
+          />
+        {/each}
+      </div>
+    {/if}
   </div>
-</Block>
-
-<style>
-  .superField {
-    display: flex;
-    align-items: stretch;
-    justify-content: stretch;
-    min-width: 0;
-  }
-
-  .superField:focus {
-    outline: none;
-  }
-  .superlabel {
-    display: flex;
-    justify-content: space-between;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: var(--label-width);
-    max-width: var(--label-width);
-    font-size: 12px;
-    line-height: 1.75rem;
-    font-weight: 400;
-    color: var(--spectrum-global-color-gray-700);
-  }
-
-  .inline-cells {
-    flex: 1;
-    display: flex;
-    justify-items: stretch;
-    height: 2rem;
-  }
-  .error {
-    font-size: 12px;
-    line-height: 1.75rem;
-    color: var(--spectrum-global-color-red-700);
-  }
-</style>
-
-
+</div>
