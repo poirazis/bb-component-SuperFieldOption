@@ -3,6 +3,7 @@
   import CellOptions from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptions.svelte";
   import CellOptionsAdvanced from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptionsAdvanced.svelte";
   import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
+  import SuperFieldLabel from "../../bb_super_components_shared/src/lib/SuperFieldLabel/SuperFieldLabel.svelte";
   import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
   import "../../bb_super_components_shared/src/lib/SuperTableCells/CellCommon.css";
 
@@ -33,6 +34,7 @@
   export let label;
   export let span = 6;
   export let placeholder;
+  export let helpText;
   export let defaultValue;
   export let disabled;
   export let readonly;
@@ -64,6 +66,7 @@
   let fieldApi;
   let fieldSchema;
   let value;
+  let showHelp;
 
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
   $: labelPos =
@@ -80,7 +83,7 @@
     validation,
     formStep
   );
-
+  $: value = fieldState?.value;
   $: unsubscribe = formField?.subscribe((value) => {
     fieldState = value?.fieldState;
     fieldApi = value?.fieldApi;
@@ -122,12 +125,7 @@
     ...$component.styles,
     normal: {
       ...$component.styles.normal,
-      "flex-direction": labelPos == "left" ? "row" : "column",
-      "align-items": "stretch",
-      gap: labelPos == "left" ? "0.5rem" : "0rem",
       "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
-      "--label-width":
-        labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
     },
   };
 
@@ -140,64 +138,66 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<div class="superField" use:styleable={$component.styles}>
-  {#if label && labelPos}
-    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
-      <span>
-        {#if icon && controlType != "select"}
-          <i class={icon} />
-        {/if}
-        {label}
-      </span>
-      {#if fieldState.error}
-        <div class="error" class:left={labelPos == "left"}>
-          <span>{fieldState.error}</span>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div use:styleable={$component.styles}>
+  <div
+    class="superField"
+    class:left-label={labelPos == "left"}
+    class:multirow={controlType != "select"}
+  >
+    <SuperFieldLabel
+      {labelPos}
+      {labelWidth}
+      {label}
+      {helpText}
+      error={fieldState?.error}
+    />
+
+    <div
+      class="inline-cells"
+      class:multirow={controlType != "select" && controlType != "inputSelect"}
+    >
+      {#if controlType == "select" || controlType == "inputSelect"}
+        <CellOptions
+          {cellOptions}
+          {fieldSchema}
+          {value}
+          {autofocus}
+          on:change={(e) => {
+            onChange?.({ value: e.detail });
+            fieldApi?.setValue(e.detail);
+          }}
+        />
+      {:else}
+        <CellOptionsAdvanced
+          {cellOptions}
+          {fieldSchema}
+          {value}
+          {autofocus}
+          on:change={(e) => {
+            onChange?.({ value: e.detail });
+            fieldApi?.setValue(e.detail);
+          }}
+        />
+      {/if}
+
+      {#if buttons?.length}
+        <div class="inline-buttons" class:vertical={controlType != "select"}>
+          {#each buttons as { text, onClick, quiet, disabled, type, size }}
+            <SuperButton
+              {quiet}
+              {disabled}
+              {size}
+              {type}
+              {text}
+              on:click={enrichButtonActions(
+                onClick,
+                $allContext
+              )({ value: fieldState.value })}
+            />
+          {/each}
         </div>
       {/if}
-    </label>
-  {/if}
-
-  <div class="inline-cells">
-    {#if controlType == "select"}
-      <CellOptions
-        {cellOptions}
-        {fieldSchema}
-        {value}
-        {autofocus}
-        on:change={(e) => {
-          onChange?.({ value: e.detail });
-          fieldApi?.setValue(e.detail);
-        }}
-      />
-    {:else}
-      <CellOptionsAdvanced
-        {cellOptions}
-        {fieldSchema}
-        {value}
-        {autofocus}
-        on:change={(e) => {
-          onChange?.({ value: e.detail });
-          fieldApi?.setValue(e.detail);
-        }}
-      />
-    {/if}
-
-    {#if buttons?.length}
-      <div class="inline-buttons" class:vertical={controlType != "select"}>
-        {#each buttons as { text, onClick, quiet, disabled, type, size }}
-          <SuperButton
-            {quiet}
-            {disabled}
-            {size}
-            {type}
-            {text}
-            on:click={enrichButtonActions(
-              onClick,
-              $allContext
-            )({ value: fieldState.value })}
-          />
-        {/each}
-      </div>
-    {/if}
+    </div>
   </div>
 </div>

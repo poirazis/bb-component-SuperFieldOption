@@ -18,7 +18,8 @@
         "type": "text",
         "label": "Label",
         "key": "label",
-        "placeholder": "Field Name"
+        "placeholder": "Field Name",
+        "resetOn": "field"
       },
       {
         "type": "text",
@@ -84,6 +85,10 @@
           {
             "label": "Select",
             "value": "select"
+          },
+          {
+            "label": "Input Select",
+            "value": "inputSelect"
           },
           {
             "label": "Radioboxes",
@@ -190,27 +195,6 @@
         "label": "Debounced",
         "key": "debounced",
         "defaultValue": false
-      },
-      {
-        "type": "boolean",
-        "label": "Search",
-        "key": "autocomplete",
-        "resetOn": "controlType",
-        "defaultValue": false,
-        "dependsOn": {
-          "setting": "controlType",
-          "value": "select"
-        }
-      },
-      {
-        "type": "boolean",
-        "label": "Allow New Value",
-        "key": "addNew",
-        "defaultValue": false,
-        "dependsOn": {
-          "setting": "autocomplete",
-          "value": true
-        }
       },
       {
         "type": "boolean",
