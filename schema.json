@@ -6,13 +6,25 @@
     "friendlyName": "Super Field - Option",
     "description": "An Option Input Field component for Budibase",
     "icon": "SelectBox",
-    "requiredAncestors": ["form"],
+    "context": [
+      {
+        "type": "static",
+        "scope": "global",
+        "values": [
+          {
+            "key": "value",
+            "label": "value",
+            "type": "string"
+          }
+        ]
+      }
+    ],
     "settings": [
       {
         "type": "field/options",
         "label": "Field",
         "key": "field",
-        "required": true
+        "defaultValue": "Option Field"
       },
       {
         "type": "text",
@@ -156,7 +168,7 @@
             "label": "Limit",
             "key": "limit",
             "resetOn": "datasource",
-            "defaultValue": 10
+            "defaultValue": 1000
           },
           {
             "type": "field",
