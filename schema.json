@@ -6,19 +6,32 @@
     "friendlyName": "Super Field - Option",
     "description": "An Option Input Field component for Budibase",
     "icon": "SelectBox",
-    "requiredAncestors": ["form"],
+    "context": [
+      {
+        "type": "static",
+        "scope": "global",
+        "values": [
+          {
+            "key": "value",
+            "label": "value",
+            "type": "string"
+          }
+        ]
+      }
+    ],
     "settings": [
       {
         "type": "field/options",
         "label": "Field",
         "key": "field",
-        "required": true
+        "defaultValue": "Option Field"
       },
       {
         "type": "text",
         "label": "Label",
         "key": "label",
-        "placeholder": "Field Name"
+        "placeholder": "Field Name",
+        "resetOn": "field"
       },
       {
         "type": "text",
@@ -86,6 +99,10 @@
             "value": "select"
           },
           {
+            "label": "Input Select",
+            "value": "inputSelect"
+          },
+          {
             "label": "Radioboxes",
             "value": "radio"
           }
@@ -147,13 +164,6 @@
             "defaultValue": "Ascending"
           },
           {
-            "type": "number",
-            "label": "Limit",
-            "key": "limit",
-            "resetOn": "datasource",
-            "defaultValue": 10
-          },
-          {
             "type": "field",
             "label": "Value column",
             "key": "valueColumn",
@@ -193,27 +203,6 @@
       },
       {
         "type": "boolean",
-        "label": "Search",
-        "key": "autocomplete",
-        "resetOn": "controlType",
-        "defaultValue": false,
-        "dependsOn": {
-          "setting": "controlType",
-          "value": "select"
-        }
-      },
-      {
-        "type": "boolean",
-        "label": "Allow New Value",
-        "key": "addNew",
-        "defaultValue": false,
-        "dependsOn": {
-          "setting": "autocomplete",
-          "value": true
-        }
-      },
-      {
-        "type": "boolean",
         "label": "Disabled",
         "key": "disabled",
         "defaultValue": false
@@ -228,6 +217,12 @@
           "value": true,
           "invert": true
         }
+      },
+      {
+        "type": "boolean",
+        "key": "invisible",
+        "label": "Invisible",
+        "defaultValue": false
       },
       {
         "type": "icon",
@@ -300,38 +295,11 @@
       },
       {
         "tag": "style",
-        "type": "select",
-        "label": "Layout",
+        "type": "number",
+        "label": "Size",
         "key": "span",
         "defaultValue": 6,
-        "showInBar": true,
-        "barStyle": "buttons",
-        "options": [
-          {
-            "label": "3 columns",
-            "value": 2,
-            "barIcon": "ViewColumn",
-            "barTitle": "3 columns"
-          },
-          {
-            "label": "2 columns",
-            "value": 3,
-            "barIcon": "ColumnTwoA",
-            "barTitle": "2 columns"
-          },
-          {
-            "label": "1 column",
-            "value": 6,
-            "barIcon": "Stop",
-            "barTitle": "1 column"
-          },
-          {
-            "label": "Full Width",
-            "value": 12,
-            "barIcon": "Maximize",
-            "barTitle": "Full Width"
-          }
-        ]
+        "min": 2
       },
       {
         "tag": "style",

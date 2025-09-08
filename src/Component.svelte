@@ -1,12 +1,15 @@
 <script>
   import { getContext, onDestroy } from "svelte";
-  import CellOptions from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptions.svelte";
-  import CellOptionsAdvanced from "../../bb_super_components_shared/src/lib/SuperTableCells/CellOptionsAdvanced.svelte";
-  import SuperButton from "../../bb_super_components_shared/src/lib/SuperButton/SuperButton.svelte";
-  import "../../bb_super_components_shared/src/lib/SuperFieldsCommon.css";
-  import "../../bb_super_components_shared/src/lib/SuperTableCells/CellCommon.css";
+  import {
+    CellOptions,
+    CellOptionsAdvanced,
+    SuperButton,
+    SuperField,
+    SuperFieldOption,
+  } from "@poirazis/supercomponents-shared";
 
-  const { styleable, enrichButtonActions } = getContext("sdk");
+  const { styleable, enrichButtonActions, Provider, builderStore } =
+    getContext("sdk");
   const component = getContext("component");
   const allContext = getContext("context");
 
@@ -18,10 +21,10 @@
   const groupDisabled = getContext("field-group-disabled");
   const formApi = formContext?.formApi;
 
-  export let field;
+  export let field = "Option Field";
   export let onChange;
   export let debounced;
-  export let debounceDelay;
+  export let debounceDelay = 50;
   export let validation;
   export let controlType = "select";
   export let role = "formInput";
@@ -33,10 +36,12 @@
   export let label;
   export let span = 6;
   export let placeholder;
+  export let helpText;
   export let defaultValue;
   export let disabled;
   export let readonly;
   export let autofocus;
+  export let invisible = false;
 
   export let icon;
 
@@ -65,6 +70,7 @@
   let fieldSchema;
   let value;
 
+  $: multirow = controlType != "radio";
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
   $: labelPos =
     groupLabelPosition && labelPosition == "fieldGroup"
@@ -80,6 +86,8 @@
     validation,
     formStep
   );
+  $: value = fieldState?.value;
+  $: error = fieldState?.error;
 
   $: unsubscribe = formField?.subscribe((value) => {
     fieldState = value?.fieldState;
@@ -96,7 +104,7 @@
     autocomplete,
     addNew,
     padding: "0.5rem",
-    error: fieldState.error,
+    error: fieldState?.error,
     controlType,
     direction,
     optionsSource,
@@ -122,12 +130,12 @@
     ...$component.styles,
     normal: {
       ...$component.styles.normal,
-      "flex-direction": labelPos == "left" ? "row" : "column",
-      "align-items": "stretch",
-      gap: labelPos == "left" ? "0.5rem" : "0rem",
-      "grid-column": span < 7 ? "span " + span : "span " + groupColumns * 6,
-      "--label-width":
-        labelPos == "left" ? (labelWidth ? labelWidth : "6rem") : "auto",
+      display:
+        invisible && !$builderStore.inBuilder
+          ? "none"
+          : $component.styles.normal.display,
+      opacity: invisible && $builderStore.inBuilder ? 0.6 : 1,
+      "grid-column": groupColumns ? `span ${span}` : "span 1",
     },
   };
 
@@ -140,31 +148,26 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-<div class="superField" use:styleable={$component.styles}>
-  {#if label && labelPos}
-    <label for="superCell" class="superlabel" class:left={labelPos == "left"}>
-      <span>
-        {#if icon && controlType != "select"}
-          <i class={icon} />
-        {/if}
-        {label}
-      </span>
-      {#if fieldState.error}
-        <div class="error" class:left={labelPos == "left"}>
-          <span>{fieldState.error}</span>
-        </div>
-      {/if}
-    </label>
-  {/if}
-
-  <div class="inline-cells">
-    {#if controlType == "select"}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div use:styleable={$component.styles}>
+  <Provider data={{ value }} />
+  <SuperField
+    {multirow}
+    {labelPos}
+    {labelWidth}
+    {field}
+    {label}
+    {error}
+    {helpText}
+  >
+    {#if controlType == "select" || controlType == "inputSelect"}
       <CellOptions
         {cellOptions}
         {fieldSchema}
         {value}
         {autofocus}
         on:change={(e) => {
+          value = e.detail;
           onChange?.({ value: e.detail });
           fieldApi?.setValue(e.detail);
         }}
@@ -199,5 +202,5 @@
         {/each}
       </div>
     {/if}
-  </div>
+  </SuperField>
 </div>
