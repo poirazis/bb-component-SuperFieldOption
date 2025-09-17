@@ -5,7 +5,6 @@
     CellOptionsAdvanced,
     SuperButton,
     SuperField,
-    SuperFieldOption,
   } from "@poirazis/supercomponents-shared";
 
   const { styleable, enrichButtonActions, Provider, builderStore } =
