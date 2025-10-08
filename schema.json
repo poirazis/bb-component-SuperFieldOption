@@ -105,6 +105,10 @@
           {
             "label": "Radioboxes",
             "value": "radio"
+          },
+          {
+            "label": "Buttons",
+            "value": "buttons"
           }
         ]
       },

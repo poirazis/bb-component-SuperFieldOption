@@ -69,7 +69,7 @@
   let fieldSchema;
   let value;
 
-  $: multirow = controlType != "radio";
+  $: multirow = controlType == "radio" && direction == "column";
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
   $: labelPos =
     groupLabelPosition && labelPosition == "fieldGroup"
@@ -135,6 +135,7 @@
           : $component.styles.normal.display,
       opacity: invisible && $builderStore.inBuilder ? 0.6 : 1,
       "grid-column": groupColumns ? `span ${span}` : "span 1",
+      overflow: "hidden",
     },
   };
 
@@ -185,7 +186,7 @@
     {/if}
 
     {#if buttons?.length}
-      <div class="inline-buttons" class:vertical={controlType != "select"}>
+      <div class="inline-buttons">
         {#each buttons as { text, onClick, quiet, disabled, type, size }}
           <SuperButton
             {quiet}
