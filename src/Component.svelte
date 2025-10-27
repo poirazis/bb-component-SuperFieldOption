@@ -166,6 +166,7 @@
         {fieldSchema}
         {value}
         {autofocus}
+        multi={false}
         on:change={(e) => {
           value = e.detail;
           onChange?.({ value: e.detail });
@@ -178,6 +179,7 @@
         {fieldSchema}
         {value}
         {autofocus}
+        multi={false}
         on:change={(e) => {
           onChange?.({ value: e.detail });
           fieldApi?.setValue(e.detail);
@@ -194,7 +196,7 @@
             {size}
             {type}
             {text}
-            on:click={enrichButtonActions(
+            onClick={enrichButtonActions(
               onClick,
               $allContext
             )({ value: fieldState.value })}
