@@ -196,10 +196,7 @@
             {size}
             {type}
             {text}
-            onClick={enrichButtonActions(
-              onClick,
-              $allContext
-            )({ value: fieldState.value })}
+            onClick={enrichButtonActions(onClick, $allContext)}
           />
         {/each}
       </div>
