@@ -7,7 +7,7 @@
     SuperField,
   } from "@poirazis/supercomponents-shared";
 
-  const { styleable, enrichButtonActions, Provider, builderStore } =
+  const { styleable, enrichButtonActions, Provider, builderStore, memo } =
     getContext("sdk");
   const component = getContext("component");
   const allContext = getContext("context");
@@ -59,7 +59,7 @@
   export let useOptionColors;
   export let optionsIcon;
   export let optionsViewMode;
-  export let autocomplete;
+  export let autocomplete = true;
   export let addNew;
 
   let formField;
@@ -67,7 +67,8 @@
   let fieldState;
   let fieldApi;
   let fieldSchema;
-  let value;
+  let value = defaultValue;
+  let cellOptions = memo({});
 
   $: multirow = controlType == "radio" && direction == "column";
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
@@ -85,7 +86,7 @@
     validation,
     formStep
   );
-  $: value = fieldState?.value;
+  $: value = fieldState?.value || defaultValue;
   $: error = fieldState?.error;
 
   $: unsubscribe = formField?.subscribe((value) => {
@@ -94,7 +95,7 @@
     fieldSchema = value?.fieldSchema;
   });
 
-  $: cellOptions = {
+  $: cellOptions.set({
     disabled: disabled || groupDisabled || fieldState?.disabled,
     readonly: readonly || fieldState?.readonly,
     placeholder: placeholder || "Choose Option",
@@ -123,7 +124,7 @@
     role,
     icon,
     showDirty,
-  };
+  });
 
   $: $component.styles = {
     ...$component.styles,
@@ -162,7 +163,7 @@
   >
     {#if controlType == "select" || controlType == "inputSelect"}
       <CellOptions
-        {cellOptions}
+        cellOptions={$cellOptions}
         {fieldSchema}
         {value}
         {autofocus}
@@ -175,12 +176,13 @@
       />
     {:else}
       <CellOptionsAdvanced
-        {cellOptions}
+        cellOptions={$cellOptions}
         {fieldSchema}
         {value}
         {autofocus}
         multi={false}
         on:change={(e) => {
+          value = e.detail;
           onChange?.({ value: e.detail });
           fieldApi?.setValue(e.detail);
         }}

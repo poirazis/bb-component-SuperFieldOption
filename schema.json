@@ -224,6 +224,12 @@
       },
       {
         "type": "boolean",
+        "key": "autocomplete",
+        "label": "Searchable",
+        "defaultValue": true
+      },
+      {
+        "type": "boolean",
         "key": "invisible",
         "label": "Invisible",
         "defaultValue": false
