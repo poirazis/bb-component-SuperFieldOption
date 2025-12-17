@@ -7,8 +7,14 @@
     SuperField,
   } from "@poirazis/supercomponents-shared";
 
-  const { styleable, enrichButtonActions, Provider, builderStore, memo } =
-    getContext("sdk");
+  const {
+    styleable,
+    enrichButtonActions,
+    Provider,
+    builderStore,
+    memo,
+    processStringSync,
+  } = getContext("sdk");
   const component = getContext("component");
   const allContext = getContext("context");
 
@@ -48,19 +54,14 @@
   export let datasource;
   export let valueColumn;
   export let labelColumn;
-  export let colorTemplate;
-  export let iconTemplate;
-  export let limit;
+  export let iconColumn;
+  export let colorColumn;
   export let sortColumn;
   export let sortOrder;
   export let filter;
   export let customOptions = [];
   export let direction;
-  export let useOptionColors;
-  export let optionsIcon;
   export let optionsViewMode;
-  export let autocomplete = true;
-  export let addNew;
 
   let formField;
   let formStep;
@@ -73,7 +74,7 @@
   $: multirow = controlType == "radio" && direction == "column";
   $: formStep = formStepContext ? $formStepContext || 1 : 1;
   $: labelPos =
-    groupLabelPosition && labelPosition == "fieldGroup"
+    groupLabelPosition !== undefined && labelPosition == "fieldGroup"
       ? groupLabelPosition
       : labelPosition;
 
@@ -100,9 +101,6 @@
     readonly: readonly || fieldState?.readonly,
     placeholder: placeholder || "Choose Option",
     debounce: debounced ? debounceDelay : false,
-    defaultValue,
-    autocomplete,
-    addNew,
     padding: "0.5rem",
     error: fieldState?.error,
     controlType,
@@ -112,17 +110,14 @@
     filter,
     sortColumn,
     sortOrder,
-    limit,
     valueColumn,
     labelColumn,
-    colorTemplate,
-    iconTemplate,
-    useOptionColors,
-    optionsIcon,
+    iconColumn,
+    colorColumn,
     optionsViewMode,
     customOptions,
     role,
-    icon,
+    icon: icon ? "ph ph-" + icon : undefined,
     showDirty,
   });
 
@@ -170,7 +165,7 @@
         multi={false}
         on:change={(e) => {
           value = e.detail;
-          onChange?.({ value: e.detail });
+          onChange?.();
           fieldApi?.setValue(e.detail);
         }}
       />
@@ -183,7 +178,7 @@
         multi={false}
         on:change={(e) => {
           value = e.detail;
-          onChange?.({ value: e.detail });
+          onChange?.();
           fieldApi?.setValue(e.detail);
         }}
       />
@@ -191,13 +186,17 @@
 
     {#if buttons?.length}
       <div class="inline-buttons">
-        {#each buttons as { text, onClick, quiet, disabled, type, size }}
+        {#each buttons as { icon, onClick, ...rest }}
           <SuperButton
-            {quiet}
-            {disabled}
-            {size}
-            {type}
-            {text}
+            {...rest}
+            icon={"ph ph-" + icon}
+            disabled={processStringSync(
+              rest.disabledTemplate ?? "",
+              $allContext
+            ) === true ||
+              disabled ||
+              groupDisabled ||
+              fieldState?.disabled}
             onClick={enrichButtonActions(onClick, $allContext)}
           />
         {/each}
