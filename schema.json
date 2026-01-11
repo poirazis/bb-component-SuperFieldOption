@@ -1,6 +1,8 @@
 {
   "type": "component",
-  "metadata": {},
+  "metadata": {
+    "svelteMajor": 5
+  },
   "schema": {
     "name": "bb-component-SuperFieldOption",
     "friendlyName": "Super Field - Option",
@@ -58,13 +60,7 @@
       {
         "type": "event",
         "label": "On change",
-        "key": "onChange",
-        "context": [
-          {
-            "label": "Field Value",
-            "key": "value"
-          }
-        ]
+        "key": "onChange"
       },
       {
         "type": "select",
@@ -105,6 +101,10 @@
           {
             "label": "Radioboxes",
             "value": "radio"
+          },
+          {
+            "label": "Buttons",
+            "value": "buttons"
           }
         ]
       },
@@ -114,7 +114,10 @@
         "key": "direction",
         "showInBar": true,
         "barStyle": "buttons",
-        "dependsOn": { "setting": "controlType", "value": "radio" },
+        "dependsOn": {
+          "setting": "controlType",
+          "value": "radio"
+        },
         "options": [
           {
             "label": "Column",
@@ -134,7 +137,10 @@
       {
         "section": true,
         "name": "Data Settings",
-        "dependsOn": { "setting": "optionsSource", "value": "data" },
+        "dependsOn": {
+          "setting": "optionsSource",
+          "value": "data"
+        },
         "settings": [
           {
             "type": "dataSource",
@@ -160,7 +166,10 @@
             "label": "Sort order",
             "key": "sortOrder",
             "resetOn": "datasource",
-            "options": ["Ascending", "Descending"],
+            "options": [
+              "Ascending",
+              "Descending"
+            ],
             "defaultValue": "Ascending"
           },
           {
@@ -168,15 +177,42 @@
             "label": "Value column",
             "key": "valueColumn",
             "defaultValue": "_id",
-            "resetOn": ["datasource", "optionsSource"],
-            "dependsOn": { "setting": "optionsSource", "value": "data" },
+            "resetOn": [
+              "datasource",
+              "optionsSource"
+            ],
+            "dependsOn": {
+              "setting": "optionsSource",
+              "value": "data"
+            },
             "required": true
           },
           {
             "type": "field",
             "label": "Label column",
-            "key": "labelColumn",
-            "resetOn": "datasource"
+            "resetOn": [
+              "datasource",
+              "optionsSource"
+            ],
+            "key": "labelColumn"
+          },
+          {
+            "type": "field",
+            "label": "Icon column",
+            "resetOn": [
+              "datasource",
+              "optionsSource"
+            ],
+            "key": "iconColumn"
+          },
+          {
+            "type": "field",
+            "label": "Color column",
+            "resetOn": [
+              "datasource",
+              "optionsSource"
+            ],
+            "key": "colorColumn"
           }
         ]
       },
@@ -219,44 +255,16 @@
         }
       },
       {
-        "type": "boolean",
-        "key": "invisible",
-        "label": "Invisible",
-        "defaultValue": false
-      },
-      {
-        "type": "icon",
+        "type": "phosphorIcon",
         "key": "icon",
         "label": "Inline Icon"
       },
       {
-        "type": "buttonConfiguration",
+        "type": "componentConfiguration",
+        "componentType": "plugin/bb-component-SuperButton",
         "key": "buttons",
         "nested": true,
-        "wide": true,
-        "context": [
-          {
-            "key": "value",
-            "label": "value"
-          }
-        ]
-      },
-      {
-        "tag": "style",
-        "type": "select",
-        "label": "Field Mode",
-        "key": "role",
-        "defaultValue": "formInput",
-        "options": [
-          {
-            "label": "Form Input",
-            "value": "formInput"
-          },
-          {
-            "label": "Inline Input",
-            "value": "inlineInput"
-          }
-        ]
+        "wide": true
       },
       {
         "tag": "style",
@@ -295,6 +303,23 @@
       },
       {
         "tag": "style",
+        "type": "select",
+        "label": "Field Mode",
+        "key": "role",
+        "defaultValue": "formInput",
+        "options": [
+          {
+            "label": "Form Input",
+            "value": "formInput"
+          },
+          {
+            "label": "Inline Input",
+            "value": "inlineInput"
+          }
+        ]
+      },
+      {
+        "tag": "style",
         "type": "number",
         "label": "Size",
         "key": "span",
@@ -308,22 +333,22 @@
         "key": "optionsViewMode",
         "defaultValue": "text",
         "showInBar": true,
-        "barStyle": "buttons",
+        "barStyle": "select",
         "options": [
           {
-            "label": "Text w Color",
+            "label": "Bullet and Text",
             "value": "colorText",
             "barIcon": "ColorPalette"
           },
           {
             "label": "Pills",
             "value": "pills",
-            "barIcon": "Button"
+            "barIcon": "Rectangle"
           },
           {
-            "label": "text",
+            "label": "Text",
             "value": "text",
-            "barIcon": "Text"
+            "barIcon": "text-t"
           }
         ]
       },
@@ -332,6 +357,13 @@
         "type": "boolean",
         "key": "showDirty",
         "label": "Show Dirty",
+        "defaultValue": false
+      },
+      {
+        "tag": "style",
+        "type": "boolean",
+        "key": "invisible",
+        "label": "Invisible",
         "defaultValue": false
       }
     ]
